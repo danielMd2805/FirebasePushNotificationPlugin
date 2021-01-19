@@ -554,6 +554,11 @@ namespace Plugin.FirebasePushNotification
                     System.Diagnostics.Debug.WriteLine($"{DomainTag}.ResolveLocalizedParameters - Incorrect string arguments {ex}");
                     return null;
                 }
+                catch (Resources.NotFoundException ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"{DomainTag}.ResolveLocalizedParameters - Resource {name} not found {ex}");
+                    return null;
+                }
             }
 
             // Resolve title localization
