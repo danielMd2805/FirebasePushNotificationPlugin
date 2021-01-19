@@ -39,7 +39,7 @@ namespace Plugin.FirebasePushNotification
         private static IFirebasePushNotification CreateFirebasePushNotification()
         {
 
-#if NETSTANDARD1_0 || NETSTANDARD2_0
+#if NETSTANDARD1_0 || NETSTANDARD2_0 || NETSTANDARD2_1
             return null;
 #else
 #pragma warning disable IDE0022 // Use expression body for methods
