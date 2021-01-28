@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Firebase.Iid;
 using Firebase.Messaging;
 using System.Collections.Generic;
@@ -219,7 +219,7 @@ namespace Plugin.FirebasePushNotification
             FirebaseMessaging.Instance.AutoInitEnabled = true;
             System.Threading.Tasks.Task.Run(async () =>
             {
-                var token = await GetTokenAsync();
+                var token = await GetTokenAsync().ConfigureAwait(false);
                 if (!string.IsNullOrEmpty(token))
                 {
 
@@ -239,7 +239,7 @@ namespace Plugin.FirebasePushNotification
 
             try
             {
-                retVal = await _tokenTcs.Task;
+                retVal = await _tokenTcs.Task.ConfigureAwait(false);
             }
             catch (Exception ex)
             {
