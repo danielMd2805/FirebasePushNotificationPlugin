@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+
 using Android.App;
 using Android.Content;
+
 using Firebase.Messaging;
 
 namespace Plugin.FirebasePushNotification
@@ -94,7 +96,6 @@ namespace Plugin.FirebasePushNotification
                 {
                     if (parameterValue.StartsWith("[") && parameterValue.EndsWith("]") && parameterValue.Length > 2)
                     {
-
                         var arrayValues = parameterValue.Substring(1, parameterValue.Length - 2);
                         parameters[locKey] = arrayValues.Split(',').Select(t => t.Trim()).ToArray();
                     }
@@ -141,7 +142,5 @@ namespace Plugin.FirebasePushNotification
         dispatcher.schedule(myJob);*/
             // [END dispatch_job]
         }
-
     }
-
 }

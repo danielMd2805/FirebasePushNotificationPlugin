@@ -16,6 +16,7 @@ using Android.Content.PM;
 using Android.Content.Res;
 using Java.Util;
 using static Android.App.ActivityManager;
+using System.Net;
 
 namespace Plugin.FirebasePushNotification
 {
@@ -30,6 +31,10 @@ namespace Plugin.FirebasePushNotification
         /// Text
         /// </summary>
         public const string TextKey = "text";
+        /// <summary>
+        /// Text
+        /// </summary>
+        public const string SubTextKey = "subtext";
         /// <summary>
         /// Subtitle
         /// </summary>
@@ -118,10 +123,14 @@ namespace Plugin.FirebasePushNotification
         public const string LargeIconKey = "large_icon";
 
         /// <summary>
+        /// Small image byte array
+        /// </summary>
+        public const string SmallImageUrlKey = "small_image_url";
+
+        /// <summary>
         /// Sound
         /// </summary>
         public const string SoundKey = "sound";
-
 
         /// <summary>
         /// Priority
@@ -164,6 +173,7 @@ namespace Plugin.FirebasePushNotification
             var smallIconResource = FirebasePushNotificationManager.IconResource;
             var notificationColor = FirebasePushNotificationManager.Color;
             var chanId = FirebasePushNotificationManager.DefaultNotificationChannelId;
+            var subText = string.Empty;
 
             if (!string.IsNullOrEmpty(FirebasePushNotificationManager.NotificationContentTextKey) && parameters.TryGetValue(FirebasePushNotificationManager.NotificationContentTextKey, out var notificationContentText))
             {
@@ -204,6 +214,11 @@ namespace Plugin.FirebasePushNotification
                 {
                     message = $"{titleContent}";
                 }
+            }
+
+            if (parameters.TryGetValue(SubTextKey, out var subtext))
+            {
+                subText = $"{subtext}";
             }
 
             if (parameters.TryGetValue(IdKey, out var id))
@@ -369,6 +384,7 @@ namespace Plugin.FirebasePushNotification
                  .SetSmallIcon(smallIconResource)
                  .SetContentTitle(title)
                  .SetContentText(message)
+                 .SetSubText(subText)
                  .SetAutoCancel(true)
                  .SetWhen(Java.Lang.JavaSystem.CurrentTimeMillis())
                  .SetContentIntent(pendingIntent);
@@ -378,11 +394,31 @@ namespace Plugin.FirebasePushNotification
                 notificationBuilder.SetShowWhen(showWhenVisible);
             }
 
-
             if (largeIconResource > 0)
             {
                 var largeIconBitmap = BitmapFactory.DecodeResource(context.Resources, largeIconResource);
                 notificationBuilder.SetLargeIcon(largeIconBitmap);
+            }
+            else if (parameters.TryGetValue(SmallImageUrlKey, out var d) && d is string uri)
+            {
+                try
+                {
+                    using (var client = new WebClient())
+                    {
+#if DEBUG
+                        ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
+#endif
+                        using (var stream = client.OpenRead(uri))
+                        {
+                            var bitmap = BitmapFactory.DecodeStream(stream);
+                            notificationBuilder.SetLargeIcon(bitmap);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine(ex.ToString());
+                }
             }
 
             var deleteIntent = new Intent(context, typeof(PushNotificationDeletedReceiver));
@@ -403,32 +439,35 @@ namespace Plugin.FirebasePushNotification
                                 notificationBuilder.SetPriority(NotificationCompat.PriorityMax);
                                 notificationBuilder.SetVibrate(new long[] { 1000, 1000, 1000, 1000, 1000 });
                                 break;
+
                             case "high":
                                 notificationBuilder.SetPriority(NotificationCompat.PriorityHigh);
                                 notificationBuilder.SetVibrate(new long[] { 1000, 1000, 1000, 1000, 1000 });
                                 break;
+
                             case "default":
                                 notificationBuilder.SetPriority(NotificationCompat.PriorityDefault);
                                 notificationBuilder.SetVibrate(new long[] { 1000, 1000, 1000, 1000, 1000 });
                                 break;
+
                             case "low":
                                 notificationBuilder.SetPriority(NotificationCompat.PriorityLow);
                                 break;
+
                             case "min":
                                 notificationBuilder.SetPriority(NotificationCompat.PriorityMin);
                                 break;
+
                             default:
                                 notificationBuilder.SetPriority(NotificationCompat.PriorityDefault);
                                 notificationBuilder.SetVibrate(new long[] { 1000, 1000, 1000, 1000, 1000 });
                                 break;
                         }
-
                     }
                     else
                     {
                         notificationBuilder.SetVibrate(new long[] { 1000, 1000, 1000, 1000, 1000 });
                     }
-
                 }
                 else
                 {
@@ -437,7 +476,6 @@ namespace Plugin.FirebasePushNotification
 
                 try
                 {
-
                     notificationBuilder.SetSound(soundUri);
                 }
                 catch (Exception ex)
@@ -445,8 +483,6 @@ namespace Plugin.FirebasePushNotification
                     System.Diagnostics.Debug.WriteLine($"{DomainTag} - Failed to set sound {ex}");
                 }
             }
-
-
 
             // Try to resolve (and apply) localized parameters
             ResolveLocalizedParameters(notificationBuilder, parameters);
@@ -491,7 +527,6 @@ namespace Plugin.FirebasePushNotification
                                 Intent actionIntent = null;
                                 PendingIntent pendingActionIntent = null;
 
-
                                 if (action.Type == NotificationActionType.Foreground)
                                 {
                                     actionIntent = typeof(Activity).IsAssignableFrom(FirebasePushNotificationManager.NotificationActivityType) ? new Intent(Application.Context, FirebasePushNotificationManager.NotificationActivityType) : (FirebasePushNotificationManager.DefaultNotificationActivityType == null ? context.PackageManager.GetLaunchIntentForPackage(context.PackageName) : new Intent(Application.Context, FirebasePushNotificationManager.DefaultNotificationActivityType));
@@ -504,7 +539,6 @@ namespace Plugin.FirebasePushNotification
                                     extras.PutString(ActionIdentifierKey, action.Id);
                                     actionIntent.PutExtras(extras);
                                     pendingActionIntent = PendingIntent.GetActivity(context, aRequestCode, actionIntent, PendingIntentFlags.UpdateCurrent);
-
                                 }
                                 else
                                 {
@@ -512,26 +546,19 @@ namespace Plugin.FirebasePushNotification
                                     extras.PutString(ActionIdentifierKey, action.Id);
                                     actionIntent.PutExtras(extras);
                                     pendingActionIntent = PendingIntent.GetBroadcast(context, aRequestCode, actionIntent, PendingIntentFlags.UpdateCurrent);
-
                                 }
 
                                 notificationBuilder.AddAction(new NotificationCompat.Action.Builder(context.Resources.GetIdentifier(action.Icon, "drawable", Application.Context.PackageName), action.Title, pendingActionIntent).Build());
                             }
-
                         }
                     }
                 }
-
-
             }
 
             OnBuildNotification(notificationBuilder, parameters);
 
             var notificationManager = (NotificationManager)context.GetSystemService(Context.NotificationService);
             notificationManager.Notify(tag, notifyId, notificationBuilder.Build());
-
-
-
         }
 
         /// <summary>
