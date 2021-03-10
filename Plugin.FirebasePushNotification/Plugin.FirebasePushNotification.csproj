@@ -111,9 +111,9 @@
     <PackageReference Include="Xamarin.Android.Support.v4" Version="28.0.0.3" />
     <PackageReference Include="Xamarin.Firebase.Common" Version="119.5.0" />
     <PackageReference Include="Xamarin.Firebase.Messaging" Version="121.0.1" />
-    <PackageReference Include="Xamarin.GooglePlayServices.Base" Version="117.5.0" />
-    <PackageReference Include="Xamarin.GooglePlayServices.Basement" Version="117.5.0" />
-    <PackageReference Include="Xamarin.GooglePlayServices.Tasks" Version="117.2.0" />
+    <PackageReference Include="Xamarin.GooglePlayServices.Base" Version="117.6.0" />
+    <PackageReference Include="Xamarin.GooglePlayServices.Basement" Version="117.6.0" />
+    <PackageReference Include="Xamarin.GooglePlayServices.Tasks" Version="117.2.1" />
     
   </ItemGroup>
 
@@ -122,21 +122,6 @@
     <None Remove="Platforms\Xamarin\**\*.cs" />
     <Compile Include="Platforms\Tizen\**\*.cs" />
     <Compile Include="Platforms\Xamarin\**\*.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Update="AsyncFixer" Version="1.5.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Update="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.3.2">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Update="Roslynator.Analyzers" Version="3.0.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
   </ItemGroup>
 
 </Project>
